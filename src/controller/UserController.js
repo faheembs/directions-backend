@@ -12,6 +12,8 @@ const identityToolkit = google.identitytoolkit("v3");
 
 const createUser = catchAsync(async (req, res, next) => {
   const {
+    firstName,
+    lastName,
     email,
     password,
   } = req.body;
@@ -21,6 +23,8 @@ const createUser = catchAsync(async (req, res, next) => {
   if (isExist) new ApiError(httpStatus.CONFLICT, "User already exist");
 
   const user = await userService.registerUser({
+    firstName,
+    lastName,
     email,
     password,
   });
@@ -53,9 +57,46 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
+const getAllUsers = catchAsync(async (req, res) => {
 
+  if (!req.user) {
+    return next(new ApiError(httpStatus.UNAUTHORIZED, "Authentication failed."));
+  }
+  const users = await userService.getAllUsers();
+
+  res.json({
+    success: true,
+    data: users,
+  });
+});
+
+
+const editUser = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { firstName, lastName, email } = req.body;
+  console.log("web ok", firstName, lastName, email)
+  const updatedUser = await userService.updateUser(userId, {
+    firstName,
+    lastName,
+    email
+  });
+
+  console.log(updatedUser)
+
+  if (!updatedUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  res.json({
+    success: true,
+    data: updatedUser,
+    message: "User has been updated.",
+  });
+});
 
 module.exports = {
   loginUser,
   createUser,
+  getAllUsers,
+  editUser
 };

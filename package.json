@@ -6,11 +6,12 @@
   "scripts": {
     "start": "node index",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index"
+    "dev": "nodemon ./index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1548.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.1.4",

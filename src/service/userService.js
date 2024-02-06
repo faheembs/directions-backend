@@ -31,6 +31,11 @@ const findOneUser = async (payload) => {
   }
 };
 
+const getAllUsers = async () => {
+  const users = await UserModel.find();
+  return users;
+};
+
 module.exports = {
   registerUser,
   findUserByEmail,
@@ -38,4 +43,5 @@ module.exports = {
   updateUser,
   deletingUser,
   findOneUser,
+  getAllUsers
 };

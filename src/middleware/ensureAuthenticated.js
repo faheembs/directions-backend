@@ -10,7 +10,7 @@ function ensureAuthenticated(req, res, next) {
   if (token.startsWith("Bearer ")) {
     token = token.slice(7, token.length);
   }
-  if (token) { 
+  if (token) {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         let err = new ApiError(httpStatus.UNAUTHORIZED, "Auth token is invalid.");
