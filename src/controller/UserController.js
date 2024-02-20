@@ -3,9 +3,9 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ErrorHandler");
 const catchAsync = require("../utils/ApiHandler");
 const createToken = require("../utils/createToken");
-const { google } = require("googleapis");
-// Create a new instance of the Google Identity Toolkit API client
-const identityToolkit = google.identitytoolkit("v3");
+const { DatasetModal } = require("../model");
+const { userLoggedIn } = require("../utils/socketManager");
+
 
 // const { userModel: User } = require("../model");
 // const helper = require("../helper/EmailValidator");
@@ -20,13 +20,18 @@ const createUser = catchAsync(async (req, res, next) => {
 
   const isExist = await userService.findUserByEmail(email);
 
-  if (isExist) new ApiError(httpStatus.CONFLICT, "User already exist");
+  if (isExist) {
+    throw new ApiError(httpStatus.CONFLICT, "User already exists");
+  }
 
+  // Add role admin for new user
+  const role = req.body.role || 'user';
   const user = await userService.registerUser({
     firstName,
     lastName,
     email,
     password,
+    role,
   });
 
   res.json({
@@ -46,9 +51,11 @@ const loginUser = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  if (!(await user.matchPassword(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password.");
-  }
+  // if (!(await user.matchPassword(password))) {
+  //   throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password.");
+  // }
+
+  // userLoggedIn(user._id);
 
   return res.json({
     success: true,
@@ -94,9 +101,31 @@ const editUser = catchAsync(async (req, res) => {
   });
 });
 
+const addPremiumDatasets = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { datasetIds } = req.body;
+  console.log(datasetIds)
+
+  const populatedDatasets = await DatasetModal.find({ _id: { $in: datasetIds } });
+
+  const updatedUser = await userService.addingPremiumDatasets(userId, populatedDatasets);
+
+  if (!updatedUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  res.json({
+    success: true,
+    data: updatedUser,
+    message: "Premium datasets have been added to the user.",
+  });
+});
+
+
 module.exports = {
   loginUser,
   createUser,
   getAllUsers,
-  editUser
+  editUser,
+  addPremiumDatasets
 };

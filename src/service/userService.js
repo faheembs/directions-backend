@@ -32,8 +32,24 @@ const findOneUser = async (payload) => {
 };
 
 const getAllUsers = async () => {
-  const users = await UserModel.find();
+  const users = await UserModel.find().populate('premiumDatasets');
   return users;
+};
+
+const addingPremiumDatasets = async (userId, datasets) => {
+  const user = await UserModel.findById(userId);
+  const newDatasets = datasets.filter(dataset => {
+    return !user.premiumDatasets.some(existingDataset =>
+      existingDataset.equals(dataset._id)
+    );
+  });
+
+
+  user.premiumDatasets.push(...newDatasets);
+
+  await user.save();
+
+  return await UserModel.findById(userId).populate('premiumDatasets');
 };
 
 module.exports = {
@@ -43,5 +59,6 @@ module.exports = {
   updateUser,
   deletingUser,
   findOneUser,
-  getAllUsers
+  getAllUsers,
+  addingPremiumDatasets,
 };

@@ -13,10 +13,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    premiumDatasets: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dataset"
+    }],
     password: {
       type: String,
     },
-
+    online: {
+      type: Boolean,
+      default: false
+    },
+    role: {
+      type: String,
+      default: 'user'
+    }
   },
   {
     timestamps: true,

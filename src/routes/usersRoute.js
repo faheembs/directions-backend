@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.get("/all-users", ensureAuthenticated, userController.getAllUsers);
 router.put("/:userId", ensureAuthenticated, userController.editUser);
+router.put("/:userId/add-premium-datasets", ensureAuthenticated, userController.addPremiumDatasets);
 
 module.exports = router;

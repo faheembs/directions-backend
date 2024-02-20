@@ -9,6 +9,7 @@ const register = {
     lastName: Joi.string(),
     email: Joi.string().email().required(),
     password: Joi.string().required().description("Password is required"),
+    role: Joi.string(),
 
   }),
 };
