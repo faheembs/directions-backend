@@ -35,8 +35,8 @@ const initSocketManager = (socketIo) => {
             try {
                 const user = await UserModel.findById(userId);
                 if (user) {
-                    user.online = true;
-                    await user.save();
+                    const updatedUser = { ...user.toObject(), online: true };
+                    await UserModel.findByIdAndUpdate(userId, updatedUser);
                     console.log(`User ${userId} online status updated`);
                     io.emit('userOnlineStatus', { userId: userId, online: true });
                 } else {
@@ -54,11 +54,11 @@ const initSocketManager = (socketIo) => {
             try {
                 const user = await UserModel.findById(userId);
                 if (user) {
-                    user.online = false;
-                    await user.save();
+                    const updatedUser = { ...user.toObject(), online: false };
+                    await UserModel.findByIdAndUpdate(userId, updatedUser);
+                    userLoggedOut(userId);
                     console.log(`User ${userId} online status updated to offline`);
                     io.emit('userOnlineStatus', { userId: userId, online: false });
-                    userLoggedOut(userId);
                 } else {
                     console.log(`User ${userId} not found`);
                 }

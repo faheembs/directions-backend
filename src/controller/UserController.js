@@ -46,7 +46,7 @@ const loginUser = catchAsync(async (req, res) => {
   const user = await userService.findUserByEmail(email);
   console.log(user._id)
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found", true);
   }
   // Verify password
   const isPasswordMatch = await bcrypt.compare(password, user.password);
@@ -82,7 +82,7 @@ const loginUser = catchAsync(async (req, res) => {
 const getAllUsers = catchAsync(async (req, res) => {
 
   if (!req.user) {
-    return next(new ApiError(httpStatus.UNAUTHORIZED, "Authentication failed."));
+    return next(new ApiError(httpStatus.UNAUTHORIZED, "Authentication failed.", true));
   }
   const users = await userService.getAllUsers();
 
