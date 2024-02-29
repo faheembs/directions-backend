@@ -8,9 +8,7 @@ const findUserByEmail = async (email) => {
   return await UserModel.findOne({ email });
 };
 
-const findUserByPhone = async (phone) => {
-  return await UserModel.findOne({ phone }).lean();
-};
+
 
 
 const updateUser = async (_id, payload) => {
@@ -52,10 +50,14 @@ const addingPremiumDatasets = async (userId, datasets) => {
   return await UserModel.findById(userId).populate('premiumDatasets');
 };
 
+const findUserById = async (_id) => {
+  return await UserModel.findById(_id).populate('userDatasets');
+};
+
 module.exports = {
   registerUser,
   findUserByEmail,
-  findUserByPhone,
+  findUserById,
   updateUser,
   deletingUser,
   findOneUser,

@@ -7,13 +7,13 @@ const createDatasetSchema = {
         label: Joi.string().required(),
         queryType: Joi.string().required(),
         // imageUrl: Joi.string().required(),
-        description: Joi.string().required(),
+        description: Joi.string().allow(""),
         detail: Joi.string().required(),
         size: Joi.number().required(),
         visible: Joi.boolean(),
         isPremium: Joi.boolean(),
         // dataUrl: Joi.string().required(),
-        // configUrl: Joi.string().required(),
+        config: Joi.string().allow(''),
     }),
 };
 

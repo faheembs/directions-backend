@@ -1,5 +1,6 @@
 const { DatasetModal } = require("../model");
 
+
 const findDatasetByLabel = async (label) => {
     try {
         const dataset = await DatasetModal.findOne({ label });
@@ -19,12 +20,13 @@ const findDatasetById = async (datasetId) => {
     }
 };
 
-const createDataset = async (datasetData) => {
+
+const createDatasetInternal = async (datasetData) => {
     try {
         const dataset = await DatasetModal.create(datasetData);
         return dataset;
     } catch (error) {
-        console.error("Error in createDataset:", error);
+        console.error("Error in createDatasetInternal :", error);
         throw error;
     }
 };
@@ -49,10 +51,11 @@ const deleteDatasetById = async (datasetId) => {
     }
 };
 
+
 module.exports = {
     findDatasetByLabel,
-    createDataset,
+    createDatasetInternal,
     getAllDatasets,
     findDatasetById,
-    deleteDatasetById
+    deleteDatasetById,
 };

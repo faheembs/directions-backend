@@ -3,12 +3,10 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ErrorHandler");
 const catchAsync = require("../utils/ApiHandler");
 const createToken = require("../utils/createToken");
-const { DatasetModal } = require("../model");
+const { DatasetModal, UserModel } = require("../model");
 const { userLoggedIn } = require("../utils/socketManager");
+const bcrypt = require('bcryptjs')
 
-
-// const { userModel: User } = require("../model");
-// const helper = require("../helper/EmailValidator");
 
 const createUser = catchAsync(async (req, res, next) => {
   const {
@@ -46,17 +44,34 @@ const createUser = catchAsync(async (req, res, next) => {
 const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await userService.findUserByEmail(email);
-
+  console.log(user._id)
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
+  // Verify password
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+  console.log(isPasswordMatch)
+  if (!isPasswordMatch) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password", true);
+  }
+  // Find userDatasets
+  const userDatasets = await DatasetModal.find({ addedBy: user._id });
 
-  // if (!(await user.matchPassword(password))) {
-  //   throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password.");
-  // }
+  // Combine premiumDatasets and userDatasets into allDatasetsOfUser
+  const allDatasetsOfUser = [...user.premiumDatasets, ...userDatasets];
 
-  // userLoggedIn(user._id);
+  // console.log(allDatasetsOfUser)
 
+  // Remove duplicates
+  const uniqueDatasets = allDatasetsOfUser.filter((dataset, index, self) =>
+    index === self.findIndex((d) => (
+      d._id.toString() === (dataset._id && dataset._id.toString())
+    ))
+  );
+
+  // Assign allDatasetsOfUser to user
+  user.allDatasetsOfUser = uniqueDatasets;
+  userLoggedIn(user._id)
   return res.json({
     success: true,
     data: user,
@@ -121,11 +136,40 @@ const addPremiumDatasets = catchAsync(async (req, res) => {
   });
 });
 
+const getUserDatasets = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await userService.findUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  // Populate premiumDatasets 
+  const populatedUser = await UserModel.populate(user, { path: 'premiumDatasets' });
+
+  // Find userDatasets
+  const userDatasets = await DatasetModal.find({ addedBy: userId });
+
+  // Combine premiumDatasets and userDatasets into allDatasetsOfUser
+  const allDatasetsOfUser = [...populatedUser.premiumDatasets, ...userDatasets];
+
+
+  const uniqueDatasets = allDatasetsOfUser.filter((dataset, index, self) =>
+    index === self.findIndex((d) => (
+      d._id.toString() === (dataset._id && dataset._id.toString())
+    ))
+  );
+
+  res.json({
+    success: true,
+    data: uniqueDatasets,
+  });
+});
 
 module.exports = {
   loginUser,
   createUser,
   getAllUsers,
   editUser,
-  addPremiumDatasets
+  addPremiumDatasets,
+  getUserDatasets
 };

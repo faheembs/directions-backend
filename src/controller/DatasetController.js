@@ -1,11 +1,19 @@
+const fs = require('fs')
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ErrorHandler");
 const catchAsync = require("../utils/ApiHandler");
 const { datasetService } = require("../service");
 const { DatasetModal } = require("../model");
+const uploadToS3 = require("../utils/uploadToS3");
+
+
+
+
+
 
 // CREATE DATASET
 const createDataset = catchAsync(async (req, res, next) => {
+    const userId = req.params.userId;
     const {
         label,
         queryType,
@@ -15,21 +23,72 @@ const createDataset = catchAsync(async (req, res, next) => {
         visible,
         isPremium,
     } = req.body;
-    const image = req.files['image'][0].path;
-    const dataUrl = req.files['data'][0].path;
-    const configUrl = req.files['config'][0].path;
+
+    console.log("ok")
+    // console.log("files", req.files['image'][0])
+    const imageFile = req.files['image'] ? req.files['image'][0] : null;
+    const dataFile = req.files['data'] ? req.files['data'][0] : null;
+    const configFile = req.files['config'] ? req.files['config'][0] : null;
+
+    console.log("ok 2")
+    // 
+
+    // console.log("IMAGE URL ------", imageUrl)
+
+    // console.log("config", configUrl)
 
     const existingDataset = await datasetService.findDatasetByLabel(label);
-
+    // if (!imageUrl || !dataUrl || !configUrl) {
+    //     throw new ApiError(httpStatus.BAD_REQUEST, "Missing file(s) in request");
+    // }
     if (existingDataset) {
-        throw new ApiError(httpStatus.CONFLICT, "Dataset with this label already exists");
+
+        // fs.unlink(imageFile.path);
+        try {
+            fs.unlinkSync('src/uploads/' + imageFile.filename);
+            console.log('Image file deleted successfully');
+
+            fs.unlinkSync('src/uploads/' + dataFile.filename);
+            console.log('Data file deleted successfully');
+
+            if (configFile !== null) {
+                fs.unlinkSync('src/uploads/' + configFile.filename);
+                console.log('Config file deleted successfully');
+            }
+        } catch (error) {
+            console.error('Error deleting files:', error);
+        }
+        console.log("ok 3")
+        // console.log("asdfsd", httpStatus.CONFLICT);
+
+        throw new ApiError(httpStatus.CONFLICT, "Dataset with this label already exists", true);
+
     }
 
+    // Upload files to S3 and get URLs
+    const imageUrl = await uploadToS3(imageFile, 'images');
+    const dataUrl = await uploadToS3(dataFile, 'files');
+    const configUrl = configFile !== null ? await uploadToS3(configFile, 'files') : null;
+
+    // try {
+    //     fs.unlinkSync('src/uploads/' + imageFile.filename);
+    //     console.log('Image file deleted successfully');
+
+    //     fs.unlinkSync('src/uploads/' + dataFile.filename);
+    //     console.log('Data file deleted successfully');
+
+    //     if (configFile !== null) {
+    //         fs.unlinkSync('src/uploads/' + configFile.filename);
+    //         console.log('Config file deleted successfully');
+    //     }
+    // } catch (error) {
+    //     console.error('Error deleting files:', error);
+    // }
     // Create the dataset
-    const dataset = await datasetService.createDataset({
+    const dataset = await datasetService.createDatasetInternal({
         label,
         queryType,
-        image,
+        image: imageUrl,
         description,
         detail,
         size,
@@ -37,18 +96,20 @@ const createDataset = catchAsync(async (req, res, next) => {
         isPremium,
         dataUrl,
         configUrl,
+        addedBy: userId,
     });
 
     res.json({
         data: {
             ...dataset.toObject(),
-            image,
+            imageUrl,
             dataUrl,
             configUrl,
         },
         success: true,
         message: "Dataset has been created.",
     });
+
 });
 
 
@@ -115,5 +176,5 @@ module.exports = {
     createDataset,
     getAllDatasets,
     updateIsPremium,
-    deleteDataset
+    deleteDataset,
 };

@@ -7,7 +7,7 @@ const upload = require("../utils/multerConfig");
 const router = express.Router();
 
 router
-    .route("/create")
+    .route("/:userId/create")
     .post(upload.fields([
         { name: 'image', maxCount: 1 },
         { name: 'data', maxCount: 1 },

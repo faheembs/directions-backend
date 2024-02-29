@@ -14,7 +14,9 @@ const DatasetSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
+        required: false,
+        default: null
+
     },
     detail: {
         type: String,
@@ -32,12 +34,20 @@ const DatasetSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    data: {
+    dataUrl: {
         type: String,
+        required: true,
     },
-    config: {
+    configUrl: {
         type: String,
+        default: null,
+        required: false,
     },
+    addedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    }
 });
 
 module.exports = mongoose.model("Dataset", DatasetSchema);

@@ -27,8 +27,17 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: 'user'
-    }
+    },
+    userDatasets: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dataset"
+    }],
+    allDatasetsOfUser: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dataset"
+    }]
   },
+
   {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -36,13 +45,20 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// userSchema.virtual('userDatasets', {
+//   ref: 'Dataset',
+//   localField: '_id',
+//   foreignField: 'addedBy',
+//   justOne: false,
+// });
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 userSchema.pre("save", async function (next) {
   if (this.password) {
-    const salt = await bcrypt.genSalt();
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
     this.password = await bcrypt.hash(this.password, salt);
   }
 

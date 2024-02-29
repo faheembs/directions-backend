@@ -12,8 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1548.0",
+    "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "csvtojson": "^2.0.10",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "formidable": "^3.5.1",
