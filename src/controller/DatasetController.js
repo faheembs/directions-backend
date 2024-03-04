@@ -66,7 +66,7 @@ const createDataset = catchAsync(async (req, res, next) => {
     }
 
     // Upload files to S3 and get URLs
-    const imageUrl = await uploadToS3(imageFile, 'images');
+    const imageUrl = imageFile !== null ? await uploadToS3(imageFile, 'images') : 'https://directions-assets.s3.eu-north-1.amazonaws.com/images/image-1709229176975-60907121.png';
     const dataUrl = await uploadToS3(dataFile, 'files');
     const configUrl = configFile !== null ? await uploadToS3(configFile, 'files') : null;
 
