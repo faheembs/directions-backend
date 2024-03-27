@@ -28,6 +28,7 @@ const createDataset = catchAsync(async (req, res, next) => {
     // console.log("files", req.files['image'][0])
     const imageFile = req.files['image'] ? req.files['image'][0] : null;
     const dataFile = req.files['data'] ? req.files['data'][0] : null;
+    console.log(dataFile)
     const configFile = req.files['config'] ? req.files['config'][0] : null;
 
     console.log("ok 2")
@@ -66,8 +67,8 @@ const createDataset = catchAsync(async (req, res, next) => {
     }
 
     // Upload files to S3 and get URLs
-    const imageUrl = imageFile !== null ? await uploadToS3(imageFile, 'images') : 'https://directions-assets.s3.eu-north-1.amazonaws.com/images/image-1709229176975-60907121.png';
-    const dataUrl = await uploadToS3(dataFile, 'files');
+    const imageUrl = (imageFile !== null && imageFile.mimetype.includes('image')) ? await uploadToS3(imageFile, 'images') : 'https://directions-assets.s3.eu-north-1.amazonaws.com/images/image-1709229176975-60907121.png';
+    const dataUrl = dataFile.mimetype.includes('application/json') || dataFile.mimetype.includes('text/csv') ? await uploadToS3(dataFile, 'files') : null;
     const configUrl = configFile !== null ? await uploadToS3(configFile, 'files') : null;
 
     // try {
