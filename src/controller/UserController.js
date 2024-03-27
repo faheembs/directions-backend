@@ -116,6 +116,44 @@ const editUser = catchAsync(async (req, res) => {
   });
 });
 
+
+const updateUserAllowExportData = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { allowExportData } = req.body;
+
+
+
+  const updatedUser = await userService.updateUser(userId, { allowExportData });
+
+  if (!updatedUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  res.json({
+    success: true,
+    data: updatedUser,
+    message: "User is allowed to use the Export Data feature.",
+  });
+});
+
+const updateUserAllowCombineDatasets = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { allowCombineDatasets } = req.body;
+  console.log(userId)
+  console.log(allowCombineDatasets, "allowCombineDatasets")
+
+  const updatedUser = await userService.updateUser(userId, { allowCombineDatasets });
+
+  if (!updatedUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  res.json({
+    success: true,
+    data: updatedUser,
+    message: "User is allowed to combine datasets.",
+  });
+});
 const addPremiumDatasets = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const { datasetIds } = req.body;
@@ -128,12 +166,12 @@ const addPremiumDatasets = catchAsync(async (req, res) => {
   if (!updatedUser) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
-
   res.json({
     success: true,
     data: updatedUser,
     message: "Premium datasets have been added to the user.",
   });
+
 });
 
 const getUserDatasets = catchAsync(async (req, res) => {
@@ -147,7 +185,10 @@ const getUserDatasets = catchAsync(async (req, res) => {
   const populatedUser = await UserModel.populate(user, { path: 'premiumDatasets' });
 
   // Find userDatasets
-  const userDatasets = await DatasetModal.find({ addedBy: userId });
+  const userDatasets = await DatasetModal.find({ addedBy: userId }).populate({
+    path: 'addedBy',
+    model: 'User'
+  });;
 
   // Combine premiumDatasets and userDatasets into allDatasetsOfUser
   const allDatasetsOfUser = [...populatedUser.premiumDatasets, ...userDatasets];
@@ -170,6 +211,8 @@ module.exports = {
   createUser,
   getAllUsers,
   editUser,
+  updateUserAllowExportData,
+  updateUserAllowCombineDatasets,
   addPremiumDatasets,
   getUserDatasets
 };

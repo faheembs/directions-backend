@@ -6,7 +6,7 @@ const { combinedDatasetController } = require('../controller');
 router.get('/get-all', combinedDatasetController.getAllCombinedDatasets);
 
 router
-    .route("/createCombined")
+    .route("/:userId/createCombined")
     .post(combinedDatasetController.createCombinedDataset);
 
 module.exports = router;

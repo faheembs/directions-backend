@@ -33,7 +33,10 @@ const createDatasetInternal = async (datasetData) => {
 
 const getAllDatasets = async () => {
     try {
-        const datasets = await DatasetModal.find();
+        const datasets = await DatasetModal.find().populate({
+            path: 'addedBy',
+            model: 'User'
+        });
         return datasets;
     } catch (error) {
         console.error("Error in getAllDatasets:", error);

@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { CombinedDatasetModal } = require('../model');
+const { CombinedDatasetModal, DatasetModal } = require('../model');
 const catchAsync = require('../utils/ApiHandler');
 const ApiError = require('../utils/ErrorHandler');
 const { combinedDatasetService } = require('../service');
@@ -30,19 +30,32 @@ const getAllCombinedDatasets = catchAsync(async (req, res) => {
 
 const createCombinedDataset = catchAsync(async (req, res) => {
     const { dataset1, dataset2, name } = req.body;
+    const userId = req.params.userId;
+    console.log(userId)
+    console.log(dataset1, dataset2, name)
+
 
     const datasetIds = [dataset1, dataset2];
     const existingDatasets = await combinedDatasetService.findDatasetsByIds(datasetIds);
+    console.log('ok..')
 
     if (!existingDatasets || existingDatasets.length !== 2) {
         throw new ApiError(httpStatus.NOT_FOUND, "Datasets not found or count is not equal to 2");
     }
 
     const dataUrls = existingDatasets.map(dataset => dataset.dataUrl);
+    console.log('ok')
     const combinedFileUrl = await combinedDatasetService.combineAndUploadFiles(dataUrls[0], dataUrls[1]);
+    console.log('ok1')
 
 
-    const combinedDataset = await CombinedDatasetModal.create({ dataUrl: combinedFileUrl, name: name });
+    const combinedDataset = await DatasetModal.create({
+        dataUrl: combinedFileUrl,
+        label: name,
+        combinedDataset: true,
+        addedBy: userId
+    });
+    console.log('ok2')
 
     res.status(httpStatus.CREATED).json({
         success: true,

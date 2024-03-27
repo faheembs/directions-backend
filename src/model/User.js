@@ -28,6 +28,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'user'
     },
+    allowExportData: {
+      type: Boolean,
+      default: false
+    },
+    allowCombineDatasets: {
+      type: Boolean,
+      default: false
+    },
     userDatasets: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Dataset"
@@ -56,6 +64,12 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 userSchema.pre("save", async function (next) {
+  // If the role is admin, set allowExportData and allowCombineDatasets to true
+  // if (this.role === 'admin') {
+  //   this.allowExportData = true;
+  //   this.allowCombineDatasets = true;
+  // }
+
   if (this.password) {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);

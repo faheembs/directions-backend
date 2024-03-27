@@ -7,10 +7,13 @@ const DatasetSchema = new mongoose.Schema({
     },
     queryType: {
         type: String,
-        required: true,
+        required: false,
+        default: 'sample'
     },
     image: {
         type: String,
+        required: false,
+        default: null
     },
     description: {
         type: String,
@@ -20,11 +23,13 @@ const DatasetSchema = new mongoose.Schema({
     },
     detail: {
         type: String,
-        required: true,
+        required: false,
+        default: null
     },
     size: {
         type: Number,
-        required: true,
+        required: false,
+        default: null
     },
     visible: {
         type: Boolean,
@@ -47,7 +52,17 @@ const DatasetSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
+    },
+    combinedDataset: {
+        type: Boolean,
+        default: false
+    },
+},
+    {
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     }
-});
+);
 
 module.exports = mongoose.model("Dataset", DatasetSchema);
