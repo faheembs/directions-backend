@@ -9,21 +9,24 @@ const bcrypt = require('bcryptjs')
 
 
 const createUser = catchAsync(async (req, res, next) => {
+  // console.log("1", req.headers)
   const {
     firstName,
     lastName,
     email,
     password,
+    role
   } = req.body;
-
+  // console.log("req", req.body)
   const isExist = await userService.findUserByEmail(email);
 
   if (isExist) {
-    throw new ApiError(httpStatus.CONFLICT, "User already exists");
+    throw new ApiError(httpStatus.CONFLICT, "User already exists", true);
   }
 
+
   // Add role admin for new user
-  const role = req.body.role || 'user';
+  // const role = req.body.role || 'user';
   const user = await userService.registerUser({
     firstName,
     lastName,
@@ -31,6 +34,8 @@ const createUser = catchAsync(async (req, res, next) => {
     password,
     role,
   });
+  if (!user) throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "User not saved successfully", true);
+  // console.log(user)
 
   res.json({
     data: user,
@@ -50,7 +55,7 @@ const loginUser = catchAsync(async (req, res) => {
   }
   // Verify password
   const isPasswordMatch = await bcrypt.compare(password, user.password);
-  console.log(isPasswordMatch)
+  // console.log(isPasswordMatch)
   if (!isPasswordMatch) {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password", true);
   }
@@ -85,7 +90,6 @@ const getAllUsers = catchAsync(async (req, res) => {
     return next(new ApiError(httpStatus.UNAUTHORIZED, "Authentication failed.", true));
   }
   const users = await userService.getAllUsers();
-
   res.json({
     success: true,
     data: users,
@@ -96,7 +100,7 @@ const getAllUsers = catchAsync(async (req, res) => {
 const editUser = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const { firstName, lastName, email } = req.body;
-  console.log("web ok", firstName, lastName, email)
+  // console.log("web ok", firstName, lastName, email)
   const updatedUser = await userService.updateUser(userId, {
     firstName,
     lastName,
