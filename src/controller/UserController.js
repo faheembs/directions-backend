@@ -49,7 +49,7 @@ const createUser = catchAsync(async (req, res, next) => {
 const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await userService.findUserByEmail(email);
-  console.log(user._id)
+  console.log("user", user)
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found", true);
   }

@@ -28,10 +28,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'user'
     },
-    allowExportData: {
-      type: Boolean,
-      default: false
-    },
+    // allowExportData: {
+    //   type: Boolean,
+    //   default: false
+    // },
     allowCombineDatasets: {
       type: Boolean,
       default: false

@@ -18,8 +18,8 @@ app.use(express.json());
 
 app.use("/", require("./routes"));
 app.use(errorConverter);
-app.use(errorHandler);
 const server = http.createServer(app);
+app.use(errorHandler);
 
 
 // Socket.IO
